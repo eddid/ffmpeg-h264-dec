@@ -229,7 +229,8 @@ int ff_set_sar(AVCodecContext *avctx, AVRational sar)
     if (ret < 0) {
         av_log(avctx, AV_LOG_WARNING, "ignoring invalid SAR: %d/%d\n",
                sar.num, sar.den);
-        avctx->sample_aspect_ratio = (AVRational){ 0, 1 };
+        avctx->sample_aspect_ratio.num = 0;
+        avctx->sample_aspect_ratio.den = 1;
         return ret;
     } else {
         avctx->sample_aspect_ratio = sar;
@@ -815,7 +816,8 @@ int ff_init_buffer_info(AVCodecContext *avctx, AVFrame *frame)
             av_log(avctx, AV_LOG_WARNING, "ignoring invalid SAR: %u/%u\n",
                    frame->sample_aspect_ratio.num,
                    frame->sample_aspect_ratio.den);
-            frame->sample_aspect_ratio = (AVRational){ 0, 1 };
+            frame->sample_aspect_ratio.num = 0;
+            frame->sample_aspect_ratio.den = 1;
         }
 
         break;
@@ -1316,7 +1318,8 @@ int attribute_align_arg avcodec_open2(AVCodecContext *avctx, const AVCodec *code
             av_log(avctx, AV_LOG_WARNING, "ignoring invalid SAR: %u/%u\n",
                    avctx->sample_aspect_ratio.num,
                    avctx->sample_aspect_ratio.den);
-            avctx->sample_aspect_ratio = (AVRational){ 0, 1 };
+            avctx->sample_aspect_ratio.num = 0;
+            avctx->sample_aspect_ratio.den = 1;
         }
     }
 
@@ -1370,6 +1373,7 @@ int attribute_align_arg avcodec_open2(AVCodecContext *avctx, const AVCodec *code
     if (!HAVE_THREADS)
         av_log(avctx, AV_LOG_WARNING, "Warning: not compiled with thread support, using thread emulation\n");
 
+#if CONFIG_FRAME_THREAD_ENCODER
     if (CONFIG_FRAME_THREAD_ENCODER && av_codec_is_encoder(avctx->codec)) {
         ff_unlock_avcodec(codec); //we will instantiate a few encoders thus kick the counter to prevent false detection of a problem
         ret = ff_frame_thread_encoder_init(avctx, options ? *options : NULL);
@@ -1377,7 +1381,8 @@ int attribute_align_arg avcodec_open2(AVCodecContext *avctx, const AVCodec *code
         if (ret < 0)
             goto free_and_end;
     }
-
+#endif
+#if HAVE_THREADS
     if (HAVE_THREADS
         && !(avctx->internal->frame_thread_encoder && (avctx->active_thread_type&FF_THREAD_FRAME))) {
         ret = ff_thread_init(avctx);
@@ -1385,6 +1390,7 @@ int attribute_align_arg avcodec_open2(AVCodecContext *avctx, const AVCodec *code
             goto free_and_end;
         }
     }
+#endif
     if (!HAVE_THREADS && !(codec->capabilities & AV_CODEC_CAP_AUTO_THREADS))
         avctx->thread_count = 1;
 
@@ -1636,8 +1642,12 @@ FF_ENABLE_DEPRECATION_WARNINGS
         }
 
 #if FF_API_AVCTX_TIMEBASE
-        if (avctx->framerate.num > 0 && avctx->framerate.den > 0)
-            avctx->time_base = av_inv_q(av_mul_q(avctx->framerate, (AVRational){avctx->ticks_per_frame, 1}));
+        if (avctx->framerate.num > 0 && avctx->framerate.den > 0) {
+            AVRational rational;
+            rational.num = avctx->ticks_per_frame;
+            rational.den = 1;
+            avctx->time_base = av_inv_q(av_mul_q(avctx->framerate, rational));
+        }
 #endif
     }
     if (codec->priv_data_size > 0 && avctx->priv_data && codec->priv_class) {
@@ -1928,9 +1938,11 @@ int attribute_align_arg avcodec_encode_video2(AVCodecContext *avctx,
         return AVERROR(ENOSYS);
     }
 
+#if CONFIG_FRAME_THREAD_ENCODER
     if(CONFIG_FRAME_THREAD_ENCODER &&
        avctx->internal->frame_thread_encoder && (avctx->active_thread_type&FF_THREAD_FRAME))
         return ff_thread_video_encode_frame(avctx, avpkt, frame, got_packet_ptr);
+#endif
 
     if ((avctx->flags&AV_CODEC_FLAG_PASS1) && avctx->stats_out)
         avctx->stats_out[0] = '\0';
@@ -2210,10 +2222,13 @@ int attribute_align_arg avcodec_decode_video2(AVCodecContext *avctx, AVFrame *pi
             goto fail;
 
         avctx->internal->pkt = &tmp;
+#if HAVE_THREADS
         if (HAVE_THREADS && avctx->active_thread_type & FF_THREAD_FRAME)
             ret = ff_thread_decode_frame(avctx, picture, got_picture_ptr,
                                          &tmp);
-        else {
+        else
+#endif
+        {
             ret = avctx->codec->decode(avctx, picture, got_picture_ptr,
                                        &tmp);
             if (!(avctx->codec->caps_internal & FF_CODEC_CAP_SETS_PKT_DTS))
@@ -2264,8 +2279,12 @@ fail:
     av_assert0(!picture->extended_data || picture->extended_data == picture->data);
 
 #if FF_API_AVCTX_TIMEBASE
-    if (avctx->framerate.num > 0 && avctx->framerate.den > 0)
-        avctx->time_base = av_inv_q(av_mul_q(avctx->framerate, (AVRational){avctx->ticks_per_frame, 1}));
+    if (avctx->framerate.num > 0 && avctx->framerate.den > 0) {
+        AVRational rational;
+        rational.num = avctx->ticks_per_frame;
+        rational.den = 1;
+        avctx->time_base = av_inv_q(av_mul_q(avctx->framerate, rational));
+    }
 #endif
 
     return ret;
@@ -2313,9 +2332,12 @@ int attribute_align_arg avcodec_decode_audio4(AVCodecContext *avctx,
             goto fail;
 
         avctx->internal->pkt = &tmp;
+#if HAVE_THREADS
         if (HAVE_THREADS && avctx->active_thread_type & FF_THREAD_FRAME)
             ret = ff_thread_decode_frame(avctx, frame, got_frame_ptr, &tmp);
-        else {
+        else
+#endif
+        {
             ret = avctx->codec->decode(avctx, frame, got_frame_ptr, &tmp);
             av_assert0(ret <= tmp.size);
             frame->pkt_dts = avpkt->dts;
@@ -2356,8 +2378,12 @@ int attribute_align_arg avcodec_decode_audio4(AVCodecContext *avctx,
                 av_samples_copy(frame->extended_data, frame->extended_data, 0, avctx->internal->skip_samples,
                                 frame->nb_samples - avctx->internal->skip_samples, avctx->channels, frame->format);
                 if(avctx->pkt_timebase.num && avctx->sample_rate) {
-                    int64_t diff_ts = av_rescale_q(avctx->internal->skip_samples,
-                                                   (AVRational){1, avctx->sample_rate},
+                    int64_t diff_ts;
+                    AVRational rational;
+                    rational.num = 1;
+                    rational.den = avctx->sample_rate;
+                    diff_ts = av_rescale_q(avctx->internal->skip_samples,
+                                                   rational,
                                                    avctx->pkt_timebase);
                     if(frame->pkt_pts!=AV_NOPTS_VALUE)
                         frame->pkt_pts += diff_ts;
@@ -2381,8 +2407,12 @@ int attribute_align_arg avcodec_decode_audio4(AVCodecContext *avctx,
                 *got_frame_ptr = 0;
             } else {
                 if(avctx->pkt_timebase.num && avctx->sample_rate) {
-                    int64_t diff_ts = av_rescale_q(frame->nb_samples - discard_padding,
-                                                   (AVRational){1, avctx->sample_rate},
+                    AVRational rational;
+                    int64_t diff_ts;
+                    rational.num = 1;
+                    rational.den = avctx->sample_rate;
+                    diff_ts = av_rescale_q(frame->nb_samples - discard_padding,
+                                                   rational,
                                                    avctx->pkt_timebase);
                     av_frame_set_pkt_duration(frame, diff_ts);
                 } else {
@@ -2621,9 +2651,11 @@ int avcodec_decode_subtitle2(AVCodecContext *avctx, AVSubtitle *sub,
         } else {
             avctx->internal->pkt = &pkt_recoded;
 
-            if (avctx->pkt_timebase.num && avpkt->pts != AV_NOPTS_VALUE)
+            if (avctx->pkt_timebase.num && avpkt->pts != AV_NOPTS_VALUE) {
+                AVRational rational = {1, AV_TIME_BASE};
                 sub->pts = av_rescale_q(avpkt->pts,
-                                        avctx->pkt_timebase, AV_TIME_BASE_Q);
+                                        avctx->pkt_timebase, rational);
+            }
             ret = avctx->codec->decode(avctx, sub, got_sub_ptr, &pkt_recoded);
             av_assert1((ret >= 0) >= !!*got_sub_ptr &&
                        !!*got_sub_ptr >= !!sub->num_rects);
@@ -2888,6 +2920,7 @@ static int do_encode(AVCodecContext *avctx, const AVFrame *frame, int *got_packe
 
 int attribute_align_arg avcodec_send_frame(AVCodecContext *avctx, const AVFrame *frame)
 {
+    int got_packet = 0;
     if (!avcodec_is_open(avctx) || !av_codec_is_encoder(avctx->codec))
         return AVERROR(EINVAL);
 
@@ -2913,7 +2946,7 @@ int attribute_align_arg avcodec_send_frame(AVCodecContext *avctx, const AVFrame 
     if (avctx->internal->buffer_pkt_valid)
         return AVERROR(EAGAIN);
 
-    return do_encode(avctx, frame, &(int){0});
+    return do_encode(avctx, frame, &got_packet);
 }
 
 int attribute_align_arg avcodec_receive_packet(AVCodecContext *avctx, AVPacket *avpkt)
@@ -2957,12 +2990,16 @@ av_cold int avcodec_close(AVCodecContext *avctx)
 
     if (avcodec_is_open(avctx)) {
         FramePool *pool = avctx->internal->pool;
+#if CONFIG_FRAME_THREAD_ENCODER
         if (CONFIG_FRAME_THREAD_ENCODER &&
             avctx->internal->frame_thread_encoder && avctx->thread_count > 1) {
             ff_frame_thread_encoder_free(avctx);
         }
+#endif
+#if HAVE_THREADS
         if (HAVE_THREADS && avctx->internal->thread_ctx)
             ff_thread_free(avctx);
+#endif
         if (avctx->codec && avctx->codec->close)
             avctx->codec->close(avctx);
         avctx->internal->byte_buffer_size = 0;
@@ -3346,9 +3383,12 @@ void avcodec_flush_buffers(AVCodecContext *avctx)
     av_packet_unref(avctx->internal->buffer_pkt);
     avctx->internal->buffer_pkt_valid = 0;
 
+#if HAVE_THREADS
     if (HAVE_THREADS && avctx->active_thread_type & FF_THREAD_FRAME)
         ff_thread_flush(avctx);
-    else if (avctx->codec->flush)
+    else
+#endif
+    if (avctx->codec->flush)
         avctx->codec->flush(avctx);
 
     avctx->pts_correction_last_pts =
@@ -3417,16 +3457,16 @@ int av_get_exact_bits_per_sample(enum AVCodecID codec_id)
 enum AVCodecID av_get_pcm_codec(enum AVSampleFormat fmt, int be)
 {
     static const enum AVCodecID map[AV_SAMPLE_FMT_NB][2] = {
-        [AV_SAMPLE_FMT_U8  ] = { AV_CODEC_ID_PCM_U8,    AV_CODEC_ID_PCM_U8    },
-        [AV_SAMPLE_FMT_S16 ] = { AV_CODEC_ID_PCM_S16LE, AV_CODEC_ID_PCM_S16BE },
-        [AV_SAMPLE_FMT_S32 ] = { AV_CODEC_ID_PCM_S32LE, AV_CODEC_ID_PCM_S32BE },
-        [AV_SAMPLE_FMT_FLT ] = { AV_CODEC_ID_PCM_F32LE, AV_CODEC_ID_PCM_F32BE },
-        [AV_SAMPLE_FMT_DBL ] = { AV_CODEC_ID_PCM_F64LE, AV_CODEC_ID_PCM_F64BE },
-        [AV_SAMPLE_FMT_U8P ] = { AV_CODEC_ID_PCM_U8,    AV_CODEC_ID_PCM_U8    },
-        [AV_SAMPLE_FMT_S16P] = { AV_CODEC_ID_PCM_S16LE, AV_CODEC_ID_PCM_S16BE },
-        [AV_SAMPLE_FMT_S32P] = { AV_CODEC_ID_PCM_S32LE, AV_CODEC_ID_PCM_S32BE },
-        [AV_SAMPLE_FMT_FLTP] = { AV_CODEC_ID_PCM_F32LE, AV_CODEC_ID_PCM_F32BE },
-        [AV_SAMPLE_FMT_DBLP] = { AV_CODEC_ID_PCM_F64LE, AV_CODEC_ID_PCM_F64BE },
+        /*[AV_SAMPLE_FMT_U8  ] = */{ AV_CODEC_ID_PCM_U8,    AV_CODEC_ID_PCM_U8    },
+        /*[AV_SAMPLE_FMT_S16 ] = */{ AV_CODEC_ID_PCM_S16LE, AV_CODEC_ID_PCM_S16BE },
+        /*[AV_SAMPLE_FMT_S32 ] = */{ AV_CODEC_ID_PCM_S32LE, AV_CODEC_ID_PCM_S32BE },
+        /*[AV_SAMPLE_FMT_FLT ] = */{ AV_CODEC_ID_PCM_F32LE, AV_CODEC_ID_PCM_F32BE },
+        /*[AV_SAMPLE_FMT_DBL ] = */{ AV_CODEC_ID_PCM_F64LE, AV_CODEC_ID_PCM_F64BE },
+        /*[AV_SAMPLE_FMT_U8P ] = */{ AV_CODEC_ID_PCM_U8,    AV_CODEC_ID_PCM_U8    },
+        /*[AV_SAMPLE_FMT_S16P] = */{ AV_CODEC_ID_PCM_S16LE, AV_CODEC_ID_PCM_S16BE },
+        /*[AV_SAMPLE_FMT_S32P] = */{ AV_CODEC_ID_PCM_S32LE, AV_CODEC_ID_PCM_S32BE },
+        /*[AV_SAMPLE_FMT_FLTP] = */{ AV_CODEC_ID_PCM_F32LE, AV_CODEC_ID_PCM_F32BE },
+        /*[AV_SAMPLE_FMT_DBLP] = */{ AV_CODEC_ID_PCM_F64LE, AV_CODEC_ID_PCM_F64BE },
     };
     if (fmt < 0 || fmt >= AV_SAMPLE_FMT_NB)
         return AV_CODEC_ID_NONE;
@@ -4020,7 +4060,8 @@ static void codec_parameters_reset(AVCodecParameters *par)
     par->color_trc           = AVCOL_TRC_UNSPECIFIED;
     par->color_space         = AVCOL_SPC_UNSPECIFIED;
     par->chroma_location     = AVCHROMA_LOC_UNSPECIFIED;
-    par->sample_aspect_ratio = (AVRational){ 0, 1 };
+    par->sample_aspect_ratio.num = 0;
+    par->sample_aspect_ratio.den = 1;
     par->profile             = FF_PROFILE_UNKNOWN;
     par->level               = FF_LEVEL_UNKNOWN;
 }

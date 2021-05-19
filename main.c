@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(_MSC_VER)
+#include <time.h>
+#include <winsock.h>
+#else
 #include <sys/time.h>
+#endif
 #include "libavcodec/avcodec.h"
 #include "decoder.h"
 
@@ -48,15 +53,34 @@ static int decode_write_frame(FILE *file, AVCodecContext *avctx,
 
 static void h264_video_decode(const char *filename, const char *outfilename)
 {
+	FILE *file;
+	FILE *outfile;
+	AVCodec *codec;
+	AVCodecContext *codec_ctx;
+	AVCodecParserContext* parser;
+	AVFrame *frame;
+
+	int ending = 0;
+	int need_more = 1;
+	int frame_index = 0;
+	uint8_t buffer[BUFFER_CAPACITY];
+	uint8_t* buf = buffer;
+	int buf_size = 0;
+	AVPacket packet;
+	
+	int64_t tv_start, tv_end;
+	float time;
+	float speed;
+
 	printf("Decode file '%s' to '%s'\n", filename, outfilename);
 
-	FILE *file = fopen(filename, "rb");
+	file = fopen(filename, "rb");
 	if (!file) {
 		fprintf(stderr, "Could not open '%s'\n", filename);
 		exit(1);
 	}
 	
-	FILE *outfile = fopen(outfilename, "wb");
+	outfile = fopen(outfilename, "wb");
 	if (!outfile) {
 		fprintf(stderr, "Could not open '%s'\n", outfilename);
 		exit(1);
@@ -65,13 +89,13 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 	avcodec_register(&ff_h264_decoder);
 	av_register_codec_parser(&ff_h264_parser);
 	
-	AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_H264);
+	codec = avcodec_find_decoder(AV_CODEC_ID_H264);
 	if (!codec) {
 		fprintf(stderr, "Codec not found\n");
 		exit(1);
 	}
 
-	AVCodecContext *codec_ctx = avcodec_alloc_context3(codec);
+	codec_ctx = avcodec_alloc_context3(codec);
 	if (!codec_ctx) {
 		fprintf(stderr, "Could not allocate video codec context\n");
 		exit(1);
@@ -82,36 +106,33 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 		exit(1);
 	}
 	
-	AVCodecParserContext* parser = av_parser_init(AV_CODEC_ID_H264);
+	parser = av_parser_init(AV_CODEC_ID_H264);
 	if(!parser) {
 		fprintf(stderr, "Could not create H264 parser\n");
 		exit(1);
 	}
 
-	AVFrame *frame = av_frame_alloc();
+	frame = av_frame_alloc();
 	if (!frame) {
 		fprintf(stderr, "Could not allocate video frame\n");
 		exit(1);
 	}
 	
-	int ending = 0;
-	int need_more = 1;
-	int frame_index = 0;
-	uint8_t buffer[BUFFER_CAPACITY];
-	uint8_t* buf = buffer;
-	int buf_size = 0;
-	AVPacket packet;
-	
-	struct timeval tv_start, tv_end;
-	gettimeofday(&tv_start, NULL);
+	tv_start = av_gettime();
 	while (!ending) {
+		uint8_t* data = NULL;
+  		int size = 0;
+		int bytes_used;
+		int bytes_read;
+		int ret;
+
 		if (need_more == 1 && buf_size + READ_SIZE <= BUFFER_CAPACITY) {
 			// Move unused data in buffer to front, if any
 			if (buf_size > 0) {
 				memcpy(buffer, buf, buf_size);
 				buf = buffer;
 			}
-			int bytes_read = fread(buffer + buf_size, 1, READ_SIZE, file);
+			bytes_read = fread(buffer + buf_size, 1, READ_SIZE, file);
 			if (bytes_read == 0) {
 				// EOF or error
 				ending = 1;
@@ -121,9 +142,7 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 			}
 		}
 		
-		uint8_t* data = NULL;
-  		int size = 0;
-		int bytes_used = av_parser_parse2(parser, codec_ctx, &data, &size, buf, buf_size, 0, 0, AV_NOPTS_VALUE);
+		bytes_used = av_parser_parse2(parser, codec_ctx, &data, &size, buf, buf_size, 0, 0, AV_NOPTS_VALUE);
 		if (size == 0) {
 			need_more = 1;
 			continue;
@@ -133,7 +152,7 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 			av_init_packet(&packet);
 			packet.data = data;
 			packet.size = size;
-			int ret = decode_write_frame(outfile, codec_ctx, frame, &frame_index, &packet, 0);
+			ret = decode_write_frame(outfile, codec_ctx, frame, &frame_index, &packet, 0);
 			if (ret < 0) {
 				fprintf(stderr, "Decode or write frame error\n");
 				exit(1);
@@ -149,7 +168,7 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 	packet.size = 0;
 	decode_write_frame(outfile, codec_ctx, frame, &frame_index, &packet, 1);
 
-	gettimeofday(&tv_end, NULL);
+	tv_end = av_gettime();
 
 	fclose(file);
 	fclose(outfile);
@@ -160,8 +179,8 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 	av_frame_free(&frame);
 	printf("Done\n");
 
-	float time = (tv_end.tv_sec + (tv_end.tv_usec / 1000000.0)) - (tv_start.tv_sec + (tv_start.tv_usec / 1000000.0));
-	float speed = (frame_index + 1) / time;
+	time = (tv_end - tv_start) / 1000000.0;
+	speed = (frame_index + 1) / time;
 	printf("Decoding time: %.3fs, speed: %.1f FPS\n", time, speed);
 }
 
@@ -175,9 +194,13 @@ void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height) {
 
 static void broadway_decode(const char *filename, const char *outfilename)
 {
+	FILE *finput;
+	u32 length;
+	u8* buffer;
+
 	printf("Decode file '%s' to '%s'\n", filename, outfilename);
 
-	FILE *finput = fopen(filename, "rb");
+	finput = fopen(filename, "rb");
 	if (!finput) {
 		fprintf(stderr, "Could not open '%s'\n", filename);
 		exit(1);
@@ -190,11 +213,11 @@ static void broadway_decode(const char *filename, const char *outfilename)
 	}
 	
 	fseek(finput, 0L, SEEK_END);
-	u32 length = (u32)ftell(finput);
+	length = (u32)ftell(finput);
 	rewind(finput);
 	
 	broadwayInit();
-	u8* buffer = broadwayCreateStream(length);
+	buffer = broadwayCreateStream(length);
 	fread(buffer, sizeof(u8), length, finput);
 	fclose(finput);
 	

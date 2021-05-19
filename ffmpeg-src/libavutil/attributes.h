@@ -165,4 +165,9 @@
 #    define av_noreturn
 #endif
 
+#if ( defined(__ARMCC_VERSION) || defined(_MSC_VER) ) && \
+    !defined(inline) && !defined(__cplusplus)
+#define inline __inline
+#endif
+
 #endif /* AVUTIL_ATTRIBUTES_H */

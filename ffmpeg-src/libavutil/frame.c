@@ -79,13 +79,15 @@ FF_ENABLE_DEPRECATION_WARNINGS
 const char *av_get_colorspace_name(enum AVColorSpace val)
 {
     static const char * const name[] = {
-        [AVCOL_SPC_RGB]       = "GBR",
-        [AVCOL_SPC_BT709]     = "bt709",
-        [AVCOL_SPC_FCC]       = "fcc",
-        [AVCOL_SPC_BT470BG]   = "bt470bg",
-        [AVCOL_SPC_SMPTE170M] = "smpte170m",
-        [AVCOL_SPC_SMPTE240M] = "smpte240m",
-        [AVCOL_SPC_YCOCG]     = "YCgCo",
+        /*[AVCOL_SPC_RGB]       = */"GBR",
+        /*[AVCOL_SPC_BT709]     = */"bt709",
+        "",
+        "",
+        /*[AVCOL_SPC_FCC]       = */"fcc",
+        /*[AVCOL_SPC_BT470BG]   = */"bt470bg",
+        /*[AVCOL_SPC_SMPTE170M] = */"smpte170m",
+        /*[AVCOL_SPC_SMPTE240M] = */"smpte240m",
+        /*[AVCOL_SPC_YCOCG]     = */"YCgCo",
     };
     if ((unsigned)val >= FF_ARRAY_ELEMS(name))
         return NULL;
@@ -107,7 +109,8 @@ static void get_frame_defaults(AVFrame *frame)
     av_frame_set_pkt_pos              (frame, -1);
     av_frame_set_pkt_size             (frame, -1);
     frame->key_frame           = 1;
-    frame->sample_aspect_ratio = (AVRational){ 0, 1 };
+    frame->sample_aspect_ratio.num = 0;
+    frame->sample_aspect_ratio.den = 1;
     frame->format              = -1; /* unknown */
     frame->extended_data       = frame->data;
     frame->color_primaries     = AVCOL_PRI_UNSPECIFIED;

@@ -156,7 +156,7 @@ int ff_h264_field_end(H264Context *h, H264SliceContext *sl, int in_setup)
     int err = 0;
     h->mb_y = 0;
 
-#if FF_API_CAP_VDPAU
+#if FF_API_CAP_VDPAU && CONFIG_H264_VDPAU_DECODER
     if (CONFIG_H264_VDPAU_DECODER &&
         h->avctx->codec->capabilities & AV_CODEC_CAP_HWACCEL_VDPAU)
         ff_vdpau_h264_set_reference_frames(h);
@@ -179,7 +179,7 @@ int ff_h264_field_end(H264Context *h, H264SliceContext *sl, int in_setup)
                    "hardware accelerator failed to decode picture\n");
     }
 
-#if FF_API_CAP_VDPAU
+#if FF_API_CAP_VDPAU && CONFIG_H264_VDPAU_DECODER
     if (CONFIG_H264_VDPAU_DECODER &&
         h->avctx->codec->capabilities & AV_CODEC_CAP_HWACCEL_VDPAU)
         ff_vdpau_h264_picture_complete(h);

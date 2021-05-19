@@ -191,9 +191,13 @@ simple_round:
 int64_t av_add_stable(AVRational ts_tb, int64_t ts, AVRational inc_tb, int64_t inc)
 {
     int64_t m, d;
+    AVRational rational;
 
-    if (inc != 1)
-        inc_tb = av_mul_q(inc_tb, (AVRational) {inc, 1});
+    if (inc != 1) {
+        rational.num = inc;
+        rational.den = 1;
+        inc_tb = av_mul_q(inc_tb, rational);
+    }
 
     m = inc_tb.num * (int64_t)ts_tb.den;
     d = inc_tb.den * (int64_t)ts_tb.num;

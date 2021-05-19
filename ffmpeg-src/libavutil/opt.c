@@ -137,9 +137,10 @@ static int write_number(void *obj, const AVOption *o, void *dst, double num, int
         break;
     case AV_OPT_TYPE_RATIONAL:
     case AV_OPT_TYPE_VIDEO_RATE:
-        if ((int) num == num)
-            *(AVRational *)dst = (AVRational) { num *intnum, den };
-        else
+        if ((int) num == num) {
+            ((AVRational *)dst)->num = num *intnum;
+            ((AVRational *)dst)->den = den;
+        } else
             *(AVRational *)dst = av_d2q(num * intnum / den, 1 << 24);
         break;
     default:
@@ -878,9 +879,10 @@ int av_opt_get_q(void *obj, const char *name, int search_flags, AVRational *out_
     if ((ret = get_number(obj, name, NULL, &num, &den, &intnum, search_flags)) < 0)
         return ret;
 
-    if (num == 1.0 && (int)intnum == intnum)
-        *out_val = (AVRational){intnum, den};
-    else
+    if (num == 1.0 && (int)intnum == intnum) {
+        out_val->num = intnum;
+        out_val->den = den;
+    } else
         *out_val = av_d2q(num*intnum/den, 1<<24);
     return 0;
 }
@@ -912,9 +914,10 @@ int av_opt_get_video_rate(void *obj, const char *name, int search_flags, AVRatio
     if ((ret = get_number(obj, name, NULL, &num, &den, &intnum, search_flags)) < 0)
         return ret;
 
-    if (num == 1.0 && (int)intnum == intnum)
-        *out_val = (AVRational) { intnum, den };
-    else
+    if (num == 1.0 && (int)intnum == intnum) {
+        out_val->num = intnum;
+        out_val->den = den;
+    } else
         *out_val = av_d2q(num * intnum / den, 1 << 24);
     return 0;
 }
@@ -1908,7 +1911,8 @@ int av_opt_is_set_to_default(void *obj, const AVOption *o)
             return ret;
         return (w == *(int *)dst) && (h == *((int *)dst+1));
     case AV_OPT_TYPE_VIDEO_RATE:
-        q = (AVRational){0, 0};
+        q.num = 0;
+        q.den = 0;
         if (o->default_val.str) {
             if ((ret = av_parse_video_rate(&q, o->default_val.str)) < 0)
                 return ret;

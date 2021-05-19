@@ -246,7 +246,11 @@ void av_freep(void *arg)
     void *val;
 
     memcpy(&val, arg, sizeof(val));
+#if defined(_MSC_VER)
+    memset(arg, 0x00, sizeof(val));
+#else
     memcpy(arg, &(void *){ NULL }, sizeof(val));
+#endif
     av_free(val);
 }
 

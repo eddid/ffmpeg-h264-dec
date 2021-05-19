@@ -108,8 +108,9 @@ int av_strerror(int errnum, char *errbuf, size_t errbuf_size);
  */
 static inline char *av_make_error_string(char *errbuf, size_t errbuf_size, int errnum)
 {
-    av_strerror(errnum, errbuf, errbuf_size);
-    return errbuf;
+    static char buf[AV_ERROR_MAX_STRING_SIZE];
+    av_strerror(errnum, buf, AV_ERROR_MAX_STRING_SIZE);
+    return buf;
 }
 
 /**
@@ -117,7 +118,7 @@ static inline char *av_make_error_string(char *errbuf, size_t errbuf_size, int e
  * function arguments but never stand-alone.
  */
 #define av_err2str(errnum) \
-    av_make_error_string((char[AV_ERROR_MAX_STRING_SIZE]){0}, AV_ERROR_MAX_STRING_SIZE, errnum)
+    av_make_error_string(NULL, AV_ERROR_MAX_STRING_SIZE, errnum)
 
 /**
  * @}

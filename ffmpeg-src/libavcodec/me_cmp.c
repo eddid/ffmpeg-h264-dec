@@ -983,14 +983,19 @@ av_cold void ff_me_cmp_init(MECmpContext *c, AVCodecContext *avctx)
     ff_dsputil_init_dwt(c);
 #endif
 
-    if (ARCH_ALPHA)
+#if (ARCH_ALPHA)
         ff_me_cmp_init_alpha(c, avctx);
-    if (ARCH_ARM)
+#endif
+#if (ARCH_ARM)
         ff_me_cmp_init_arm(c, avctx);
-    if (ARCH_PPC)
+#endif
+#if (ARCH_PPC)
         ff_me_cmp_init_ppc(c, avctx);
-    if (ARCH_X86)
+#endif
+#if (ARCH_X86)
         ff_me_cmp_init_x86(c, avctx);
-    if (ARCH_MIPS)
+#endif
+#if (ARCH_MIPS)
         ff_me_cmp_init_mips(c, avctx);
+#endif
 }

@@ -241,24 +241,24 @@ typedef struct ImgUtils {
 } ImgUtils;
 
 static const AVClass imgutils_class = {
-    .class_name = "IMGUTILS",
-    .item_name  = av_default_item_name,
-    .version    = LIBAVUTIL_VERSION_INT,
-    .log_level_offset_offset   = offsetof(ImgUtils, log_offset),
-    .parent_log_context_offset = offsetof(ImgUtils, log_ctx),
+    /*.class_name = */"IMGUTILS",
+    /*.item_name  = */av_default_item_name,
+    /*.option     = */NULL,
+    /*.version    = */LIBAVUTIL_VERSION_INT,
+    /*.log_level_offset_offset   = */offsetof(ImgUtils, log_offset),
+    /*.parent_log_context_offset = */offsetof(ImgUtils, log_ctx),
 };
 
 int av_image_check_size(unsigned int w, unsigned int h, int log_offset, void *log_ctx)
 {
-    ImgUtils imgutils = {
-        .class      = &imgutils_class,
-        .log_offset = log_offset,
-        .log_ctx    = log_ctx,
-    };
+    ImgUtils imgutils;
 
     if ((int)w>0 && (int)h>0 && (w+128)*(uint64_t)(h+128) < INT_MAX/8)
         return 0;
 
+    imgutils.class = &imgutils_class;
+    imgutils.log_offset = log_offset;
+    imgutils.log_ctx = log_ctx;
     av_log(&imgutils, AV_LOG_ERROR, "Picture size %ux%u is invalid\n", w, h);
     return AVERROR(EINVAL);
 }

@@ -1344,7 +1344,7 @@ again:
                 if (h->avctx->hwaccel &&
                     (ret = h->avctx->hwaccel->start_frame(h->avctx, buf, buf_size)) < 0)
                     goto end;
-#if FF_API_CAP_VDPAU
+#if FF_API_CAP_VDPAU && CONFIG_H264_VDPAU_DECODER
                 if (CONFIG_H264_VDPAU_DECODER &&
                     h->avctx->codec->capabilities & AV_CODEC_CAP_HWACCEL_VDPAU)
                     ff_vdpau_h264_picture_start(h);
@@ -1358,7 +1358,7 @@ again:
                                                        nal->raw_size);
                     if (ret < 0)
                         goto end;
-#if FF_API_CAP_VDPAU
+#if FF_API_CAP_VDPAU && CONFIG_H264_VDPAU_DECODER
                 } else if (CONFIG_H264_VDPAU_DECODER &&
                            h->avctx->codec->capabilities & AV_CODEC_CAP_HWACCEL_VDPAU) {
                     ff_vdpau_add_data_chunk(h->cur_pic_ptr->f->data[0],
@@ -1702,6 +1702,7 @@ int h264_decode_frame(AVCodecContext *avctx, void *data,
             if (ret < 0)
                 return ret;
             *got_frame = 1;
+#if CONFIG_MPEGVIDEO
             if (CONFIG_MPEGVIDEO) {
                 ff_print_debug_info2(h->avctx, pict, NULL,
                                     h->next_output_pic->mb_type,
@@ -1710,6 +1711,7 @@ int h264_decode_frame(AVCodecContext *avctx, void *data,
                                     &h->low_delay,
                                     h->mb_width, h->mb_height, h->mb_stride, 1);
             }
+#endif
         }
     }
 
@@ -1769,61 +1771,93 @@ static av_cold int h264_decode_end(AVCodecContext *avctx)
 #define OFFSET(x) offsetof(H264Context, x)
 #define VD AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_DECODING_PARAM
 static const AVOption h264_options[] = {
-    {"is_avc", "is avc", offsetof(H264Context, is_avc), AV_OPT_TYPE_BOOL, {.i64 = 0}, 0, 1, 0},
-    {"nal_length_size", "nal_length_size", offsetof(H264Context, nal_length_size), AV_OPT_TYPE_INT, {.i64 = 0}, 0, 4, 0},
-    { "enable_er", "Enable error resilience on damaged frames (unsafe)", OFFSET(enable_er), AV_OPT_TYPE_BOOL, { .i64 = -1 }, -1, 1, VD },
+    {"is_avc", "is avc", offsetof(H264Context, is_avc), AV_OPT_TYPE_BOOL, {/*.i64 = */0}, 0, 1, 0},
+    {"nal_length_size", "nal_length_size", offsetof(H264Context, nal_length_size), AV_OPT_TYPE_INT, {/*.i64 = */0}, 0, 4, 0},
+    { "enable_er", "Enable error resilience on damaged frames (unsafe)", OFFSET(enable_er), AV_OPT_TYPE_BOOL, {/*.i64 = */-1 }, -1, 1, VD },
     { NULL },
 };
 
 static const AVClass h264_class = {
-    .class_name = "H264 Decoder",
-    .item_name  = av_default_item_name,
-    .option     = h264_options,
-    .version    = LIBAVUTIL_VERSION_INT,
+    /*.class_name = */"H264 Decoder",
+    /*.item_name  = */av_default_item_name,
+    /*.option     = */h264_options,
+    /*.version    = */LIBAVUTIL_VERSION_INT,
 };
 
 AVCodec ff_h264_decoder = {
-    .name                  = "h264",
-    .long_name             = NULL_IF_CONFIG_SMALL("H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"),
-    .type                  = AVMEDIA_TYPE_VIDEO,
-    .id                    = AV_CODEC_ID_H264,
-    .priv_data_size        = sizeof(H264Context),
-    .init                  = ff_h264_decode_init,
-    .close                 = h264_decode_end,
-    .decode                = h264_decode_frame,
-    .capabilities          = /*AV_CODEC_CAP_DRAW_HORIZ_BAND |*/ AV_CODEC_CAP_DR1 |
+    /*.name                  = */"h264",
+    /*.long_name             = */NULL_IF_CONFIG_SMALL("H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"),
+    /*.type                  = */AVMEDIA_TYPE_VIDEO,
+    /*.id                    = */AV_CODEC_ID_H264,
+    /*.capabilities          = *//*AV_CODEC_CAP_DRAW_HORIZ_BAND |*/ AV_CODEC_CAP_DR1 |
                              AV_CODEC_CAP_DELAY | AV_CODEC_CAP_SLICE_THREADS |
                              AV_CODEC_CAP_FRAME_THREADS,
-    .caps_internal         = FF_CODEC_CAP_INIT_THREADSAFE,
-    .flush                 = flush_dpb,
-    .init_thread_copy      = ONLY_IF_THREADS_ENABLED(decode_init_thread_copy),
-    .update_thread_context = ONLY_IF_THREADS_ENABLED(ff_h264_update_thread_context),
-    .profiles              = NULL_IF_CONFIG_SMALL(ff_h264_profiles),
-    .priv_class            = &h264_class,
+    /*.supported_framerates                = */NULL,
+    /*.pix_fmts                = */NULL,
+    /*.supported_samplerates                = */NULL,
+    /*.sample_fmts                = */NULL,
+    /*.channel_layouts                = */NULL,
+    /*.max_lowres                = */0,
+    /*.priv_class            = */&h264_class,
+    /*.profiles              = */NULL_IF_CONFIG_SMALL(ff_h264_profiles),
+    /*.priv_data_size        = */sizeof(H264Context),
+    /*.next                = */NULL,
+    /*.init_thread_copy      = */ONLY_IF_THREADS_ENABLED(decode_init_thread_copy),
+    /*.update_thread_context = */ONLY_IF_THREADS_ENABLED(ff_h264_update_thread_context),
+    /*.defaults                = */NULL,
+    /*.init_static_data                = */NULL,
+    /*.init                  = */ff_h264_decode_init,
+    /*.encode_sub                = */NULL,
+    /*.decode2                = */NULL,
+    /*.decode                = */h264_decode_frame,
+    /*.close                 = */h264_decode_end,
+    /*.send_frame          = */NULL,
+    /*.send_packet          = */NULL,
+    /*.receive_frame          = */NULL,
+    /*.receive_packet          = */NULL,
+    /*.flush                 = */flush_dpb,
+    /*.caps_internal         = */FF_CODEC_CAP_INIT_THREADSAFE,
 };
 
 #if CONFIG_H264_VDPAU_DECODER && FF_API_VDPAU
 static const AVClass h264_vdpau_class = {
-    .class_name = "H264 VDPAU Decoder",
-    .item_name  = av_default_item_name,
-    .option     = h264_options,
-    .version    = LIBAVUTIL_VERSION_INT,
+    /*.class_name = */"H264 VDPAU Decoder",
+    /*.item_name  = */av_default_item_name,
+    /*.option     = */h264_options,
+    /*.version    = */LIBAVUTIL_VERSION_INT,
 };
 
 AVCodec ff_h264_vdpau_decoder = {
-    .name           = "h264_vdpau",
-    .long_name      = NULL_IF_CONFIG_SMALL("H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (VDPAU acceleration)"),
-    .type           = AVMEDIA_TYPE_VIDEO,
-    .id             = AV_CODEC_ID_H264,
-    .priv_data_size = sizeof(H264Context),
-    .init           = ff_h264_decode_init,
-    .close          = h264_decode_end,
-    .decode         = h264_decode_frame,
-    .capabilities   = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_HWACCEL_VDPAU,
-    .flush          = flush_dpb,
-    .pix_fmts       = (const enum AVPixelFormat[]) { AV_PIX_FMT_VDPAU_H264,
+    /*.name           = */"h264_vdpau",
+    /*.long_name      = */NULL_IF_CONFIG_SMALL("H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (VDPAU acceleration)"),
+    /*.type           = */AVMEDIA_TYPE_VIDEO,
+    /*.id             = */AV_CODEC_ID_H264,
+    /*.capabilities   = */AV_CODEC_CAP_DR1 | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_HWACCEL_VDPAU,
+    /*.supported_framerates                = */NULL,
+    /*.pix_fmts       = */{ AV_PIX_FMT_VDPAU_H264,
                                                      AV_PIX_FMT_NONE},
-    .profiles       = NULL_IF_CONFIG_SMALL(ff_h264_profiles),
-    .priv_class     = &h264_vdpau_class,
+    /*.supported_samplerates                = */NULL,
+    /*.sample_fmts                = */NULL,
+    /*.channel_layouts                = */NULL,
+    /*.max_lowres                = */0,
+    /*.priv_class     = */&h264_vdpau_class,
+    /*.profiles       = */NULL_IF_CONFIG_SMALL(ff_h264_profiles),
+    /*.priv_data_size = */sizeof(H264Context),
+    /*.next                = */NULL,
+    /*.init_thread_copy      = */NULL,
+    /*.update_thread_context = */NULL,
+    /*.defaults                = */NULL,
+    /*.init_static_data                = */NULL,
+    /*.init           = */ff_h264_decode_init,
+    /*.encode_sub                = */NULL,
+    /*.decode2                = */NULL,
+    /*.decode         = */h264_decode_frame,
+    /*.close          = */h264_decode_end,
+    /*.send_frame          = */NULL,
+    /*.send_packet          = */NULL,
+    /*.receive_frame          = */NULL,
+    /*.receive_packet          = */NULL,
+    /*.flush          = */flush_dpb,
+    /*.caps_internal         = */0,
 };
 #endif

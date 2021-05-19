@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h264dec", "h264dec.vcxproj", "{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}.Debug|Win32.Build.0 = Debug|Win32
+		{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}.Release|Win32.ActiveCfg = Release|Win32
+		{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

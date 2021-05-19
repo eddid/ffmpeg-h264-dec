@@ -35,17 +35,21 @@ static void streamInit(Stream *stream, u32 length) {
 static void outputFrame (AVFrame *frame) {
     int width = frame->width, height = frame->height;
     int linesize_y = frame->linesize[0], linesize_uv = frame->linesize[1];
+    int i;
+    u8 *y;
+    u8 *u;
+    u8 *v;
     if (yuv_data == NULL) {
-        yuv_data = malloc(width * height * 3 / 2);
+        yuv_data = (u8 *)malloc(width * height * 3 / 2);
     }
-    u8 *y = yuv_data, *u = y + height * width, *v = u + height/2 * width/2;
-    for (int i = 0; i < height; i++) {
+    y = yuv_data, u = y + height * width, v = u + height/2 * width/2;
+    for (i = 0; i < height; i++) {
         memcpy(y + i * width, frame->data[0] + i * linesize_y, width);
     }
-    for (int i = 0; i < height / 2; i++) {
+    for (i = 0; i < height / 2; i++) {
         memcpy(u + i * width / 2, frame->data[1] + i * linesize_uv, width / 2);
     }
-    for (int i = 0; i < height / 2; i++) {
+    for (i = 0; i < height / 2; i++) {
         memcpy(v + i * width / 2, frame->data[2] + i * linesize_uv, width / 2);
     }
     broadwayOnPictureDecoded(yuv_data, width, height);
@@ -92,12 +96,13 @@ static void parsePlayStream(Stream *stream) {
             }
         }
         if (bytes_used > 0) {
+            int len;
             // We have data of one packet, decode it; or decode whatever when ending.
             printf("Feed packet: %d\n", picDecodeNumber);
             av_init_packet(&packet);
             packet.data = data;
             packet.size = size;
-            int len = decodePacket(&packet, 0);
+            len = decodePacket(&packet, 0);
             if (len < 0) {
                 fprintf(stderr, "Error while decoding frame %d\n", picDecodeNumber);
             }
@@ -113,10 +118,11 @@ static void parsePlayStream(Stream *stream) {
 
 // The stream is an already-parsed access unit.
 static void playStream(Stream *stream) {
+    int len;
     av_init_packet(&packet);
     packet.data = stream->buffer;
     packet.size = stream->length;
-    int len = decodePacket(&packet, 0);
+    len = decodePacket(&packet, 0);
     if (len < 0) {
         fprintf(stderr, "Error while decoding frame %d\n", picDecodeNumber);
     }
@@ -127,11 +133,11 @@ static void playStream(Stream *stream) {
 }
 
 u32 broadwayInit() {
-
+    AVCodec *codec;
     avcodec_register(&ff_h264_decoder);
     av_register_codec_parser(&ff_h264_parser);
     
-    AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_H264);
+    codec = avcodec_find_decoder(AV_CODEC_ID_H264);
     if (!codec) {
         fprintf(stderr, "Codec not found\n");
         exit(1);

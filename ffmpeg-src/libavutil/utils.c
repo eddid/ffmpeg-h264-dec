@@ -123,5 +123,8 @@ unsigned av_int_list_length_for_size(unsigned elsize,
 
 AVRational av_get_time_base_q(void)
 {
-    return (AVRational){1, AV_TIME_BASE};
+    AVRational rational;
+    rational.num = 1;
+    rational.den = AV_TIME_BASE;
+    return rational;
 }

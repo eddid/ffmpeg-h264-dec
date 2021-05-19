@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\decoder.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\avcodec.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\blockdsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\bytestream.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\cabac.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\cabac_functions.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\copy_block.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\error_resilience.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\fdctdsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\frame_thread_encoder.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\get_bits.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\golomb.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h263dsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h2645_parse.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264chroma.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264data.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264dsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264idct.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264pred.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264qpel.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264_mvpred.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\h264_parse.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\hpeldsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\idctdsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\internal.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\mathops.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\me_cmp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\motion_est.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\mpeg12data.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\mpegpicture.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\mpegutils.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\mpegvideo.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\mpegvideodsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\mpegvideoencdsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\options_table.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\parser.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\pixblockdsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\pixels.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\profiles.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\put_bits.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\qpeldsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\ratecontrol.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\raw.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\rectangle.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\rl.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\rnd_avg.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\simple_idct.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\startcode.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\thread.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\version.h" />
+    <ClInclude Include="..\ffmpeg-src\libavcodec\videodsp.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\atomic.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\atomic_gcc.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\attributes.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\avassert.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\avconfig.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\avstring.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\avutil.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\bprint.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\bswap.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\buffer.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\buffer_internal.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\channel_layout.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\colorspace.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\common.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\cpu.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\cpu_internal.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\crc.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\dict.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\display.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\dynarray.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\error.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\eval.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\ffmath.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\ffversion.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\frame.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\hwcontext.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\hwcontext_internal.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\imgutils.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\internal.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\intfloat.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\intmath.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\intreadwrite.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\libm.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\log.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\macros.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\mathematics.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\mem.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\mem_internal.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\opt.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\parseutils.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\pixdesc.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\pixfmt.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\qsort.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\random_seed.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\rational.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\samplefmt.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\sha.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\stereo3d.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\thread.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\time.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\timecode.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\timer.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\time_internal.h" />
+    <ClInclude Include="..\ffmpeg-src\libavutil\version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\decoder.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\avpacket.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\bitstream.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\bit_depth_template.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\cabac.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\codec_desc.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\error_resilience.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\golomb.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h2645_parse.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264addpx_template.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264chroma.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264data.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264dsp.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264idct.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264pred.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264qpel.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_cabac.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_cavlc.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_direct.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_loopfilter.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_mb.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_parse.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_parser.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_picture.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_ps.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_refs.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_sei.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\h264_slice.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\hpel_template.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\mathtables.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\me_cmp.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\options.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\parser.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\pel_template.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\profiles.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\simple_idct.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\startcode.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\utils.c" />
+    <ClCompile Include="..\ffmpeg-src\libavcodec\videodsp.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\avstring.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\bprint.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\buffer.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\channel_layout.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\dict.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\display.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\error.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\eval.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\file_open.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\frame.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\imgutils.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\intmath.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\log.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\log2_tab.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\mathematics.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\mem.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\opt.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\parseutils.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\pixdesc.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\random_seed.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\rational.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\reverse.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\samplefmt.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\sha.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\stereo3d.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\time.c" />
+    <ClCompile Include="..\ffmpeg-src\libavutil\utils.c" />
+    <ClCompile Include="..\main.c" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>h264dec</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.;..;..\ffmpeg-src;..\ffmpeg-src\libavcodec;..\ffmpeg-src\libavutil;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)/%(RelativeDir)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x04000000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <FixedBaseAddress>true</FixedBaseAddress>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

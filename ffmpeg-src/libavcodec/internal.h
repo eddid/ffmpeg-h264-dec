@@ -249,9 +249,12 @@ attribute_deprecated int ff_alloc_packet(AVPacket *avpkt, int size);
 static av_always_inline int64_t ff_samples_to_time_base(AVCodecContext *avctx,
                                                         int64_t samples)
 {
+	AVRational rational;
     if(samples == AV_NOPTS_VALUE)
         return AV_NOPTS_VALUE;
-    return av_rescale_q(samples, (AVRational){ 1, avctx->sample_rate },
+	rational.num = 1;
+	rational.den = avctx->sample_rate;
+    return av_rescale_q(samples, rational,
                         avctx->time_base);
 }
 
