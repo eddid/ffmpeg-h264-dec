@@ -186,7 +186,6 @@
     <ClCompile Include="..\ffmpeg-src\libavutil\stereo3d.c" />
     <ClCompile Include="..\ffmpeg-src\libavutil\time.c" />
     <ClCompile Include="..\ffmpeg-src\libavutil\utils.c" />
-    <ClCompile Include="..\main.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}</ProjectGuid>
@@ -195,9 +194,9 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -229,8 +228,9 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.;..;..\ffmpeg-src;..\ffmpeg-src\libavcodec;..\ffmpeg-src\libavutil;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AssemblerListingLocation>$(IntDir)/%(RelativeDir)/</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <AssemblerListingLocation>$(IntDir)/%(RelativeDir)/</AssemblerListingLocation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

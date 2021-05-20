@@ -526,6 +526,5 @@
       <Filter>libavutil</Filter>
     </ClCompile>
     <ClCompile Include="..\decoder.c" />
-    <ClCompile Include="..\main.c" />
   </ItemGroup>
 </Project>
