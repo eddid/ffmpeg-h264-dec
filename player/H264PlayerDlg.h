@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CH264PlayerDlg dialog
 
-#include "Decode.h"
+#include "h264_decoder.h"
 #include "Picture.h"
 #include "H264PlayerDlg.h"
 #include "ImageShow.h"
@@ -21,6 +21,7 @@ class CH264PlayerDlg : public CDialog
 // Construction
 public:
 	CH264PlayerDlg(CWnd* pParent = NULL);	// standard constructor
+	~CH264PlayerDlg();
 	BOOL PreTranslateMessage(MSG* pMsg);    // 截获键盘消息
 
 	void FullScreen();                      // 全屏
@@ -52,7 +53,7 @@ public:
 	//CImageShow	m_show;
 	CStatic	m_show;
 
-	CDecode m_decode;  //解码器
+	void *m_decode;  //解码器
 	CPicture m_bmpImage; //视频图像
 	CDC* pDCShow ;
 	CRect rectShow;

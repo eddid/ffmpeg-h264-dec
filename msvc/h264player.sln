@@ -5,6 +5,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h264dec", "h264dec.vcxproj"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h264player", "h264player.vcxproj", "{53196F2D-18AA-4057-813B-600B2956755B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h264tool", "h264tool.vcxproj", "{DD447E78-3F77-44D4-AC98-C70844485FF8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B} = {DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +24,10 @@ Global
 		{53196F2D-18AA-4057-813B-600B2956755B}.Debug|Win32.Build.0 = Debug|Win32
 		{53196F2D-18AA-4057-813B-600B2956755B}.Release|Win32.ActiveCfg = Release|Win32
 		{53196F2D-18AA-4057-813B-600B2956755B}.Release|Win32.Build.0 = Release|Win32
+		{DD447E78-3F77-44D4-AC98-C70844485FF8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DD447E78-3F77-44D4-AC98-C70844485FF8}.Debug|Win32.Build.0 = Debug|Win32
+		{DD447E78-3F77-44D4-AC98-C70844485FF8}.Release|Win32.ActiveCfg = Release|Win32
+		{DD447E78-3F77-44D4-AC98-C70844485FF8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

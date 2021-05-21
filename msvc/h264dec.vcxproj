@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\decoder.h" />
     <ClInclude Include="..\ffmpeg-src\libavcodec\avcodec.h" />
     <ClInclude Include="..\ffmpeg-src\libavcodec\blockdsp.h" />
     <ClInclude Include="..\ffmpeg-src\libavcodec\bytestream.h" />
@@ -117,9 +116,9 @@
     <ClInclude Include="..\ffmpeg-src\libavutil\timer.h" />
     <ClInclude Include="..\ffmpeg-src\libavutil\time_internal.h" />
     <ClInclude Include="..\ffmpeg-src\libavutil\version.h" />
+    <ClInclude Include="..\h264_decoder.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\decoder.c" />
     <ClCompile Include="..\ffmpeg-src\libavcodec\avpacket.c" />
     <ClCompile Include="..\ffmpeg-src\libavcodec\bitstream.c" />
     <ClCompile Include="..\ffmpeg-src\libavcodec\bit_depth_template.c" />
@@ -186,6 +185,7 @@
     <ClCompile Include="..\ffmpeg-src\libavutil\stereo3d.c" />
     <ClCompile Include="..\ffmpeg-src\libavutil\time.c" />
     <ClCompile Include="..\ffmpeg-src\libavutil\utils.c" />
+    <ClCompile Include="..\h264_decoder.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}</ProjectGuid>

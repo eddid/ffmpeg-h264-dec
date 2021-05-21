@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #if defined(_MSC_VER)
 #include <time.h>
@@ -6,18 +7,11 @@
 #else
 #include <sys/time.h>
 #endif
-#include "libavcodec/avcodec.h"
-#include "decoder.h"
-
-#define READ_SIZE 4096
-#define BUFFER_CAPACITY 4096*64
-
-extern AVCodec ff_h264_decoder;
-extern AVCodecParser ff_h264_parser;
+#include "h264_decoder.h"
 
 static void yuv_save(unsigned char *buf[], int wrap[], int xsize,int ysize, FILE *f)
 {
-	int i;	
+	int i;
 	for (i = 0; i < ysize; i++) {
 		fwrite(buf[0] + i * wrap[0], 1, xsize, f);
 	}
@@ -29,44 +23,16 @@ static void yuv_save(unsigned char *buf[], int wrap[], int xsize,int ysize, FILE
 	}
 }
 
-
-static int decode_write_frame(FILE *file, AVCodecContext *avctx,
-							  AVFrame *frame, int *frame_index, AVPacket *pkt, int flush)
-{
-	int got_frame = 0;
-	do {
-		int len = avcodec_decode_video2(avctx, frame, &got_frame, pkt);
-		if (len < 0) {
-			fprintf(stderr, "Error while decoding frame %d\n", *frame_index);
-			return len;
-		}
-		if (got_frame) {
-			printf("Got frame %d\n", *frame_index);
-			if (file) {
-				yuv_save(frame->data, frame->linesize, frame->width, frame->height, file);
-			}
-			(*frame_index)++;
-		}
-	} while (flush && got_frame);
-	return 0;
-}
-
 static void h264_video_decode(const char *filename, const char *outfilename)
 {
-	FILE *file;
 	FILE *outfile;
-	AVCodec *codec;
-	AVCodecContext *codec_ctx;
-	AVCodecParserContext* parser;
-	AVFrame *frame;
+	void *decoder;
+	void *frame;
 
-	int ending = 0;
-	int need_more = 1;
+	int result = 0;
 	int frame_index = 0;
-	uint8_t buffer[BUFFER_CAPACITY];
-	uint8_t* buf = buffer;
-	int buf_size = 0;
-	AVPacket packet;
+	int frame_width = 0;
+	int frame_height = 0;
 	
 	int64_t tv_start, tv_end;
 	float time;
@@ -74,9 +40,15 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 
 	printf("Decode file '%s' to '%s'\n", filename, outfilename);
 
-	file = fopen(filename, "rb");
-	if (!file) {
-		fprintf(stderr, "Could not open '%s'\n", filename);
+	decoder = h264_decoder_create();
+	if (!decoder) {
+		fprintf(stderr, "Could not create decoder\n");
+		exit(1);
+	}
+
+	result = h264_decoder_init(decoder, filename);
+	if (result < 0) {
+		fprintf(stderr, "Could not init decoder(%d)\n", result);
 		exit(1);
 	}
 	
@@ -85,149 +57,31 @@ static void h264_video_decode(const char *filename, const char *outfilename)
 		fprintf(stderr, "Could not open '%s'\n", outfilename);
 		exit(1);
 	}
-	
-	avcodec_register(&ff_h264_decoder);
-	av_register_codec_parser(&ff_h264_parser);
-	
-	codec = avcodec_find_decoder(AV_CODEC_ID_H264);
-	if (!codec) {
-		fprintf(stderr, "Codec not found\n");
-		exit(1);
-	}
 
-	codec_ctx = avcodec_alloc_context3(codec);
-	if (!codec_ctx) {
-		fprintf(stderr, "Could not allocate video codec context\n");
-		exit(1);
-	}
-	
-	if (avcodec_open2(codec_ctx, codec, NULL) < 0) {
-		fprintf(stderr, "Could not open codec\n");
-		exit(1);
-	}
-	
-	parser = av_parser_init(AV_CODEC_ID_H264);
-	if(!parser) {
-		fprintf(stderr, "Could not create H264 parser\n");
-		exit(1);
-	}
-
-	frame = av_frame_alloc();
-	if (!frame) {
-		fprintf(stderr, "Could not allocate video frame\n");
-		exit(1);
-	}
-	
 	tv_start = av_gettime();
-	while (!ending) {
-		uint8_t* data = NULL;
-  		int size = 0;
-		int bytes_used;
-		int bytes_read;
-		int ret;
-
-		if (need_more == 1 && buf_size + READ_SIZE <= BUFFER_CAPACITY) {
-			// Move unused data in buffer to front, if any
-			if (buf_size > 0) {
-				memcpy(buffer, buf, buf_size);
-				buf = buffer;
-			}
-			bytes_read = fread(buffer + buf_size, 1, READ_SIZE, file);
-			if (bytes_read == 0) {
-				// EOF or error
-				ending = 1;
-			} else {
-				buf_size += bytes_read;
-				need_more = 0;
-			}
-		}
-		
-		bytes_used = av_parser_parse2(parser, codec_ctx, &data, &size, buf, buf_size, 0, 0, AV_NOPTS_VALUE);
-		if (size == 0) {
-			need_more = 1;
-			continue;
-		}
-		if (bytes_used > 0 || ending == 1) {
-			// We have data of one packet, decode it; or decode whatever when ending
-			av_init_packet(&packet);
-			packet.data = data;
-			packet.size = size;
-			ret = decode_write_frame(outfile, codec_ctx, frame, &frame_index, &packet, 0);
-			if (ret < 0) {
-				fprintf(stderr, "Decode or write frame error\n");
-				exit(1);
-			}
-			
-			buf_size -= bytes_used;
-			buf += bytes_used;
-		}
+	while (1) {
+	    frame= h264_decoder_getframe(decoder);
+	    if (NULL == frame) {
+	        break;
+	    }
+	    frame_width = h264_decoder_getwidth(decoder);
+	    frame_height = h264_decoder_getheight(decoder);
+		printf("Got frame %d\n", frame_index);
+		yuv_save(frame, frame, frame_width, frame_height, outfile);
+		frame_index++;
 	}
-
-	// Flush the decoder
-	packet.data = NULL;
-	packet.size = 0;
-	decode_write_frame(outfile, codec_ctx, frame, &frame_index, &packet, 1);
 
 	tv_end = av_gettime();
 
-	fclose(file);
 	fclose(outfile);
 
-	avcodec_close(codec_ctx);
-	av_free(codec_ctx);
-	av_parser_close(parser);
-	av_frame_free(&frame);
+	h264_decoder_destroy(decoder);
 	printf("Done\n");
 
 	time = (tv_end - tv_start) / 1000000.0;
 	speed = (frame_index + 1) / time;
 	printf("Decoding time: %.3fs, speed: %.1f FPS\n", time, speed);
 }
-
-
-// Test the broadway API
-static FILE *foutput;
-
-void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height) {
-	fwrite(buffer, width*height*3/2, 1, foutput);
-}
-
-static void broadway_decode(const char *filename, const char *outfilename)
-{
-	FILE *finput;
-	u32 length;
-	u8* buffer;
-
-	printf("Decode file '%s' to '%s'\n", filename, outfilename);
-
-	finput = fopen(filename, "rb");
-	if (!finput) {
-		fprintf(stderr, "Could not open '%s'\n", filename);
-		exit(1);
-	}
-	
-	foutput = fopen(outfilename, "wb");
-	if (!foutput) {
-		fprintf(stderr, "Could not open '%s'\n", outfilename);
-		exit(1);
-	}
-	
-	fseek(finput, 0L, SEEK_END);
-	length = (u32)ftell(finput);
-	rewind(finput);
-	
-	broadwayInit();
-	buffer = broadwayCreateStream(length);
-	fread(buffer, sizeof(u8), length, finput);
-	fclose(finput);
-	
-	broadwayParsePlayStream(length);
-	
-	broadwayExit();
-	
-	fclose(foutput);
-}
-
 
 int main(int argc, char* argv[])
 {

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\player\Decode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\player\H264Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -35,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\player\Decode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\player\H264Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>

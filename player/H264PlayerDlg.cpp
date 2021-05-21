@@ -80,8 +80,14 @@ CH264PlayerDlg::CH264PlayerDlg(CWnd* pParent /*=NULL*/)
 	m_inFilePath="";
 	m_firstOpen=TRUE;
 	m_bIsFullScreen = FALSE; 
+
+	m_decode = h264_decoder_create();
 }
 
+CH264PlayerDlg::~CH264PlayerDlg()
+{
+	h264_decoder_destroy(m_decode);
+}
 
 void CH264PlayerDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -375,7 +381,7 @@ DWORD CH264PlayerDlg::DecodeThread(void *pDlg)
 	
 	pPlayDlg->m_bmpImage.m_pBmpData = new BYTE [BUFLEN];  //为视频图像分配内存
 	//pPlayDlg->m_inFilePath="test.264";
-	if(!(pPlayDlg->m_decode.InitDecode(pPlayDlg->m_inFilePath)))
+	if (h264_decoder_init(pPlayDlg->m_decode, pPlayDlg->m_inFilePath) < 0)
 	{
 		pPlayDlg->SetDlgItemText(IDC_PLAY,"播放");
 		
@@ -386,15 +392,14 @@ DWORD CH264PlayerDlg::DecodeThread(void *pDlg)
 		pPlayDlg->hDecodeThread=NULL;
 		return 0;
 	}
-	while(pPlayDlg->m_decode.GetNextFrame())
+	while (!pPlayDlg->m_bIsEndThread)
 	{
-		if(pPlayDlg->m_bIsEndThread)
-			break;
-		pPlayDlg->m_decode.ImgConvert();
 		//解码当前帧的图像数据都保存到m_bmpImage对象中
-		pPlayDlg->m_bmpImage.m_pRGBBuffer = pPlayDlg->m_decode.GetBmpData();
-		pPlayDlg->m_bmpImage.m_width = pPlayDlg->m_decode.GetFrameWidth();
-		pPlayDlg->m_bmpImage.m_height = pPlayDlg->m_decode.GetFrameHeight();
+		pPlayDlg->m_bmpImage.m_pRGBBuffer = (unsigned char *)h264_decoder_getbmp(pPlayDlg->m_decode);
+		if(NULL == pPlayDlg->m_bmpImage.m_pRGBBuffer)
+			break;
+		pPlayDlg->m_bmpImage.m_width = h264_decoder_getwidth(pPlayDlg->m_decode);
+		pPlayDlg->m_bmpImage.m_height = h264_decoder_getheight(pPlayDlg->m_decode);
 		//每解码一帧就显示一帧
 		pPlayDlg->Display(pPlayDlg->pDCShow);
 		Sleep(20);
@@ -473,7 +478,6 @@ void CH264PlayerDlg::ResourceReleaseAndReconvertSet()
 	m_bIsEndThread=FALSE;
 	
 	m_bmpImage.ReleaseImage();
-	m_decode.ReleseObj();
 	CloseHandle(this->hDecodeThread);
 	hDecodeThread=NULL;
 }
