@@ -325,6 +325,7 @@
       <Filter>libavutil</Filter>
     </ClInclude>
     <ClInclude Include="..\h264_decoder.h" />
+    <ClInclude Include="..\yuv2bmp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\ffmpeg-src\libavcodec\avpacket.c">
@@ -526,5 +527,6 @@
       <Filter>libavutil</Filter>
     </ClCompile>
     <ClCompile Include="..\h264_decoder.c" />
+    <ClCompile Include="..\yuv2bmp.c" />
   </ItemGroup>
 </Project>

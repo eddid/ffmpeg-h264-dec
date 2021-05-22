@@ -117,6 +117,7 @@
     <ClInclude Include="..\ffmpeg-src\libavutil\time_internal.h" />
     <ClInclude Include="..\ffmpeg-src\libavutil\version.h" />
     <ClInclude Include="..\h264_decoder.h" />
+    <ClInclude Include="..\yuv2bmp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\ffmpeg-src\libavcodec\avpacket.c" />
@@ -186,6 +187,7 @@
     <ClCompile Include="..\ffmpeg-src\libavutil\time.c" />
     <ClCompile Include="..\ffmpeg-src\libavutil\utils.c" />
     <ClCompile Include="..\h264_decoder.c" />
+    <ClCompile Include="..\yuv2bmp.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DF6ED3F4-A1A2-4568-8A72-8A2BBCAAB69B}</ProjectGuid>
