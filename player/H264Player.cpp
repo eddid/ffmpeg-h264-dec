@@ -41,6 +41,8 @@ CH264PlayerApp theApp;
 
 BOOL CH264PlayerApp::InitInstance()
 {
+	//_CrtSetBreakAlloc(699);
+
 	AfxEnableControlContainer();
 
 	// Standard initialization

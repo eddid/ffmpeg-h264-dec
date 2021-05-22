@@ -55,7 +55,7 @@ static inline int atomic_int_add_and_fetch_gcc(volatile int *ptr, int inc)
 #if HAVE_ATOMIC_COMPARE_EXCHANGE
     return __atomic_add_fetch(ptr, inc, __ATOMIC_SEQ_CST);
 #else
-    return InterlockedExchangeAdd(ptr, inc);
+    return InterlockedExchangeAdd(ptr, inc) + inc;
 #endif
 }
 

@@ -77,7 +77,7 @@ CH264PlayerDlg::CH264PlayerDlg(CWnd* pParent /*=NULL*/)
 	m_isOver=FALSE;
 	m_bIsSuspend=TRUE;
 	m_bIsEndThread=FALSE;
-	m_inFilePath="";
+	m_inFilePath=NULL;
 	m_firstOpen=TRUE;
 	m_bIsFullScreen = FALSE; 
 
@@ -87,6 +87,9 @@ CH264PlayerDlg::CH264PlayerDlg(CWnd* pParent /*=NULL*/)
 CH264PlayerDlg::~CH264PlayerDlg()
 {
 	h264_decoder_destroy(m_decode);
+	if (NULL != m_inFilePath) {
+		delete[] m_inFilePath;
+	}
 }
 
 void CH264PlayerDlg::DoDataExchange(CDataExchange* pDX)
@@ -339,7 +342,7 @@ BOOL CH264PlayerDlg::PreTranslateMessage(MSG* pMsg)
 void CH264PlayerDlg::OnPlay() 
 {
 	// TODO: Add your control notification handler code here
-	if(this->m_inFilePath=="")
+	if(this->m_inFilePath==NULL)
 	{
 		AfxMessageBox("请选择选择播放文件！");
 	}
@@ -380,7 +383,6 @@ DWORD CH264PlayerDlg::DecodeThread(void *pDlg)
 	pPlayDlg->SetDlgItemText(IDC_PLAY,"暂停");
 	
 	pPlayDlg->m_bmpImage.m_pBmpData = new BYTE [BUFLEN];  //为视频图像分配内存
-	//pPlayDlg->m_inFilePath="test.264";
 	if (h264_decoder_init(pPlayDlg->m_decode, pPlayDlg->m_inFilePath) < 0)
 	{
 		pPlayDlg->SetDlgItemText(IDC_PLAY,"播放");
@@ -502,13 +504,16 @@ void CH264PlayerDlg::OnFileOpen()
 		filePath.Replace('\\','/');     //将文件路径中的'\'替换为'/'
 		//将CString字符串转为char*
 		int nLen =filePath.GetLength()+1;
+		if (NULL != m_inFilePath) {
+			delete[] m_inFilePath;
+		}
 		m_inFilePath = new char[nLen];   
-		m_inFilePath[nLen] = '\0';
+		m_inFilePath[nLen - 1] = '\0';
 		strcpy(m_inFilePath,(char*)filePath.GetBuffer(0));
 		Invalidate();
 		//MessageBox(m_inFilePath);
 		
-		if(m_inFilePath!="")
+		if(m_inFilePath!=NULL)
 		{
 			m_bDecoding=TRUE;
 			hDecodeThread=CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)DecodeThread,(void *)this,0,&dwThreadID);

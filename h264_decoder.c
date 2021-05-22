@@ -131,11 +131,6 @@ void *h264_decoder_getframe(void *context) {
         return NULL;
     }
 
-    av_frame_unref(decoder->frame);
-    if (decoder->frame != NULL) {
-        //av_frame_free(&decoder->frame);
-    }
-
     while ((NULL != decoder->infile) || (decoder->raw_cur != decoder->raw_ptr)) {
         uint8_t* data = NULL;
           int size = 0;
@@ -156,13 +151,6 @@ void *h264_decoder_getframe(void *context) {
         }
 
         bytes_used = av_parser_parse2(decoder->parser, decoder->codecCtx, &data, &size, decoder->raw_ptr, decoder->raw_cur - decoder->raw_ptr, 0, 0, AV_NOPTS_VALUE);
-        if ((size == 0) && (NULL == decoder->infile)) {
-            /* Drop broken data */
-            decoder->raw_cur = decoder->raw_ptr;
-            break;
-        } else if (size == 0) {
-            continue;
-        }
         if (bytes_used > 0) {
             // Move unused data in buffer to front, if any
             if (decoder->raw_cur - decoder->raw_ptr > bytes_used) {
@@ -171,22 +159,26 @@ void *h264_decoder_getframe(void *context) {
             } else {
                 decoder->raw_cur = decoder->raw_ptr;
             }
+        }
 
-            // We have data of one packet, decode it; or decode whatever when ending
-            av_init_packet(&packet);
-            packet.data = data;
-            packet.size = size;
-            got_frame = 0;
+        if (size == 0) {
+            continue;
+        }
 
-            result = avcodec_decode_video2(decoder->codecCtx, decoder->frame, &got_frame, &packet);
-            if (got_frame) {
-                FFLITE_LOGI("Got frame %d\n", frame_index);
-                frame_index++;
-                return decoder->frame->data[0];
-            } else {
-                FFLITE_LOGI("Error while decoding frame %d\n", frame_index);
-                continue;
-            }
+        // We have data of one packet, decode it; or decode whatever when ending
+        av_init_packet(&packet);
+        packet.data = data;
+        packet.size = size;
+        got_frame = 0;
+
+        result = avcodec_decode_video2(decoder->codecCtx, decoder->frame, &got_frame, &packet);
+        if (got_frame) {
+            FFLITE_LOGI("Got frame %d\n", frame_index);
+            frame_index++;
+            return decoder->frame->data[0];
+        } else {
+            FFLITE_LOGI("Error while decoding frame %d\n", frame_index);
+            continue;
         }
     }
 
@@ -243,6 +235,10 @@ int h264_decoder_destroy(void *context) {
         return AVERROR(EINVAL);
     }
 
+    if (decoder->raw_ptr != NULL) {
+        free(decoder->raw_ptr);
+        decoder->raw_ptr = NULL;
+    }
     if (decoder->buf_rgb != NULL) {
         free(decoder->buf_rgb);
         decoder->buf_rgb = NULL;
@@ -253,9 +249,7 @@ int h264_decoder_destroy(void *context) {
     }
     // Close the codec
     if (decoder->codecCtx != NULL) {
-        avcodec_close(decoder->codecCtx);
-        av_free(decoder->codecCtx);
-        decoder->codecCtx = NULL;
+        avcodec_free_context(&decoder->codecCtx);
     }
 
     // Close the video file
@@ -263,5 +257,6 @@ int h264_decoder_destroy(void *context) {
         av_parser_close(decoder->parser);
         decoder->parser = NULL;
     }
+    free(context);
     return 0;
 }
