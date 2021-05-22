@@ -1,7 +1,7 @@
 #include "h264_decoder.h"
 #include "libavcodec/avcodec.h"
 #include "libavutil/imgutils.h"
-#include "yuv2bmp.h"
+#include "yuv2rgb.h"
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -197,7 +197,7 @@ void *h264_decoder_getframe(void *context) {
 void *h264_decoder_getbmp(void *context) {
     h264_decoder *decoder = (h264_decoder *)context;
     void *frame = h264_decoder_getframe(context);
-    YUV_FORMAT format;
+
     if ((NULL == decoder) || (NULL == frame)) {
         return NULL;
     }
@@ -209,25 +209,15 @@ void *h264_decoder_getbmp(void *context) {
         decoder->buf_rgb = malloc(numBytes);
     }
     switch (decoder->frame->format) {
-#if 0
         case AV_PIX_FMT_YUV420P:
-            format = YUV_I420;
+            yuv420p_to_rgb24_1(decoder->frame->data[0], decoder->frame->data[1], decoder->frame->data[2], decoder->buf_rgb, decoder->codecCtx->width, decoder->codecCtx->height);
             break;
-#endif
-        case AV_PIX_FMT_YUV420P:
-            format = YUV_YV12;
-            break;
-        case AV_PIX_FMT_NV12:
-            format = YUV_NV12;
-            break;
-        case AV_PIX_FMT_NV21:
-            format = YUV_NV21;
+        case AV_PIX_FMT_YUV422P:
+            yuv422p_to_rgb24(frame, decoder->buf_rgb, decoder->codecCtx->width, decoder->codecCtx->height);
             break;
         default:
-            format = -1;
             break;
     }
-    yuv2bmpdata(format, frame, decoder->buf_rgb, decoder->codecCtx->width, decoder->codecCtx->height);
     return decoder->buf_rgb;
 }
 
